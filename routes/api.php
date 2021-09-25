@@ -11,4 +11,7 @@
 |
 */
 
-Route::get('test', 'HomeController@test');
+Route::group(['prefix' => 'stocks'], function () {
+    Route::post('operate', 'StockController@operate');
+    Route::get('info', 'StockController@getStockInfo');
+});

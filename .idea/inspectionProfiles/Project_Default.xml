@@ -24,5 +24,9 @@
     <inspection_tool class="PhpCSValidationInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <option name="EXTENSIONS" value="php,js,css,inc" />
     </inspection_tool>
+    <inspection_tool class="PhpDocSignatureIsNotCompleteInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PhpIncompatibleReturnTypeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PhpMissingReturnTypeInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PhpReturnDocTypeMismatchInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   </profile>
 </component>
