@@ -17,7 +17,7 @@ class CreateStockAssetsTable extends Migration
             $table->bigIncrements('id');
             $table->decimal('balance', 10, 2)->comment('余额');
             $table->decimal('market_value', 10, 2)->comment('市值');
-            $table->timestamp('compute_at')->nullable()->comment('计算时间');
+            $table->timestamp('sync_at')->nullable()->comment('同步时间');
             $table->timestamps();
         });
     }
