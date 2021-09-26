@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|StockHolding whereSyncAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StockHolding whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $buy_price 股票买入价
+ * @method static \Illuminate\Database\Eloquent\Builder|StockHolding whereBuyPrice($value)
  */
 class StockHolding extends Model
 {

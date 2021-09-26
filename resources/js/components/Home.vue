@@ -12,7 +12,7 @@
                 v-for="item in list"
                 :key="item.id"
                 :title="item.name + ' : ' + item.code"
-                :value="item.buy_at.slice(0, 10)"
+                :value="item.buy_at"
             >
                 <template #label>
                     <van-row>

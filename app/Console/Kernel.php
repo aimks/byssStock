@@ -24,8 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // 每天16点同步股票资产信息
+        $schedule->command('sync:stock-asset')->dailyAt('16:00');
     }
 
     /**

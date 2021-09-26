@@ -20,7 +20,7 @@ class CreateStockRecordsTable extends Migration
             $table->string('type', 50)->default('buy')->comment('类型,buy:买入,sell:卖出');
             $table->integer('amount')->default(0)->comment('股票数量');
             $table->decimal('close_price', 10, 2)->comment('股票收盘价');
-            $table->timestamp('operate_at')->nullable()->comment('操作时间');
+            $table->date('operate_at')->nullable()->comment('操作时间');
             $table->timestamps();
         });
     }

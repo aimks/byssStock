@@ -20,7 +20,7 @@ class CreateStockDetailsTable extends Migration
             $table->integer('amount')->default(0)->comment('股票数量');
             $table->decimal('close_price', 10, 2)->comment('股票收盘价');
             $table->decimal('market_value', 10, 2)->comment('市值，收盘价*数量');
-            $table->timestamp('sync_at')->nullable()->comment('同步时间');
+            $table->date('sync_at')->nullable()->comment('同步时间');
             $table->timestamps();
         });
     }

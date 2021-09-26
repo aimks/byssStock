@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\StockAsset;
 use App\Models\StockDetail;
 use App\Models\StockHolding;
+use App\Models\StockProfit;
 use App\Models\StockRecord;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
@@ -66,10 +67,7 @@ class StockService
             return [];
         }
         // 算出最大持仓数量
-        $amount =  floor(StockHolding::MAX_BUY_MONEY / ($closePrice * 100)) * 100;
-        if ($amount == 0) {
-            $amount = 100;
-        }
+        $amount =  floor(StockHolding::MAX_BUY_MONEY / ($closePrice * 100) + 1) * 100;
         return [
             'name' => $infoArr[0],
             'close_price' => (string)$closePrice,
@@ -129,8 +127,17 @@ class StockService
                 ConfigService::setBalance(-$amount * $closePrice);
                 break;
             case StockRecord::TYPE_SELL:
-                // 删除持仓表
                 $holding = $this->getHoldingByCode($code);
+                // 加入收益表
+                $profit = new StockProfit();
+                $profit->code = $holding->code;
+                $profit->name = $holding->name;
+                $profit->amount = $holding->amount;
+                $profit->buy_price = $holding->buy_price;
+                $profit->sell_price = $holding->close_price;
+                $profit->profit = ($profit->sell_price - $profit->buy_price) * $profit->amount;
+                $profit->save();
+                // 删除持仓表
                 $holding->delete();
                 // 更新资金余额
                 ConfigService::setBalance($amount * $closePrice);
@@ -164,7 +171,7 @@ class StockService
      */
     public function getAssetBySyncAt(string $syncAt)
     {
-        return StockAsset::whereRaw("DATE_FORMAT(sync_at, '%Y-%m-%d') = ?", [$syncAt])->first();
+        return StockAsset::where('sync_at', $syncAt)->first();
     }
 
     /**
@@ -194,6 +201,10 @@ class StockService
         $holding->close_price = $closePrice;
         $holding->market_value = $closePrice * $holding->amount;
         $holding->sync_at = $date;
+        // 买入价以第一次同步的收盘价为准
+        if (is_null($holding->buy_price)) {
+            $holding->buy_price = $closePrice;
+        }
         $holding->save();
         // 同步股票明细
         $detail = new StockDetail();
@@ -212,7 +223,7 @@ class StockService
      */
     public function syncStockAsset(string $date)
     {
-        $marketValueSum = StockDetail::whereRaw("DATE_FORMAT(sync_at, '%Y-%m-%d') = ?", [$date])->sum('market_value');
+        $marketValueSum = StockDetail::where('sync_at', $date)->sum('market_value');
         // 当天没有市值，认为休市，同步资产为上一天
         if ($marketValueSum == 0) {
             $lastDate = date("Y-m-d", strtotime($date) - 86400);
@@ -234,7 +245,7 @@ class StockService
         $xData = [];
         $sData = [];
         foreach ($assets as $asset) {
-            $xData[] = date('Y-m-d', strtotime($asset->sync_at));
+            $xData[] = $asset->sync_at;
             $sData[] = $asset->balance + $asset->market_value;
         }
         return [
