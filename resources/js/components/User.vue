@@ -134,7 +134,7 @@ export default {
             this.stock.name = item.name
             this.stock.close_price = item.close_price
             this.stock.amount = item.amount
-        }
+        },
     },
 };
 </script>

@@ -3,25 +3,38 @@
         <van-divider content-position="left">资产曲线图</van-divider>
         <div id="main" style="height:400px;background-color: #ffffff;"></div>
         <van-divider content-position="left">当前持仓</van-divider>
-        <van-cell title="服务器购买">
-            <template #label>
-                <van-notice-bar
-                    left-icon="volume-o"
-                    wrapable
-                    :scrollable="false"
-                    text="这里准备把书生老师的所有早参PDF文件存进来，并且做一个列表展示，在线预览。"
-                />
-            </template>
-        </van-cell>
+        <van-list
+            v-model="loading"
+            :finished="finished"
+            @load="onLoadHoldings"
+        >
+            <van-cell
+                v-for="item in list"
+                :key="item.id"
+                :title="item.name + ' : ' + item.code"
+                :value="item.buy_at.slice(0, 10)"
+            >
+                <template #label>
+                    <van-row>
+                        <van-col span="8">收盘价<br>{{item.close_price}}</van-col>
+                        <van-col span="8">数量<br>{{item.amount}}</van-col>
+                        <van-col span="8">市值<br>{{item.market_value}}</van-col>
+                    </van-row>
+                </template>
+            </van-cell>
+        </van-list>
     </div>
 </template>
 
 <script>
 import * as echarts from 'echarts';
+import {getHoldings} from "../utils/api";
 export default {
     data() {
         return {
-            checked: true,
+            list: [],
+            loading: false,
+            finished: false,
         }
     },
     mounted() {
@@ -52,7 +65,17 @@ export default {
                 ]
             };
             myChart.setOption(option);
-        }
+        },
+        async onLoadHoldings() {
+            this.loading = true;
+            const {
+                data: {
+                    list
+                }
+            } = await getHoldings();
+            this.list = list
+            this.finished = true;
+        },
     },
 }
 </script>

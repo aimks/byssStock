@@ -16,6 +16,10 @@ import {
     NoticeBar,
     Cell,
     CellGroup,
+    List,
+    Tag,
+    Col,
+    Row,
 } from 'vant';
 
 import {Notify} from 'vant';
@@ -31,6 +35,10 @@ Vue.use(Button);
 Vue.use(NoticeBar);
 Vue.use(Cell);
 Vue.use(CellGroup);
+Vue.use(List);
+Vue.use(Tag);
+Vue.use(Col);
+Vue.use(Row);
 
 Vue.use(Notify);
 

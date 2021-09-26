@@ -76,14 +76,16 @@ class StockController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * 获取所有持仓
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function getHoldings()
     {
-        //
+        $holdings = $this->stockService->getHoldings();
+        return $this->ok([
+            'list' => $holdings,
+        ]);
     }
 
     /**

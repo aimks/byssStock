@@ -15,3 +15,10 @@ export function operateStock(data) {
         data,
     })
 }
+
+export function getHoldings() {
+    return request({
+        url: '/stocks/holdings',
+        method: 'get',
+    })
+}
