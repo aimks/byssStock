@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {Toast} from 'vant';
+import {Notify} from 'vant';
 
 /**
  * @description axios初始化
@@ -29,7 +29,7 @@ instance.interceptors.request.use(
     }
     return config;
 }, (error) => {
-    Toast.fail('加载超时！');
+    Notify({ type: 'warning', message: '加载超时' });
     return Promise.reject(error)
 });
 /**
@@ -43,11 +43,11 @@ instance.interceptors.response.use(
     if (res.code === 200) {
         return Promise.resolve(res);
     } else {
-        Toast.fail(res.msg);
+        Notify({ type: 'warning', message: res.msg });
         return Promise.reject(res);
     }
 }, (error)=>{
-    Toast.fail('网络请求异常！');
+    Notify({ type: 'warning', message: '网络请求异常' });
     return Promise.reject(error);
 });
 

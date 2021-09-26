@@ -1,9 +1,17 @@
 import request from './request'
 
 
-export function getTest() {
+export function getStockInfo(params) {
     return request({
-        url: '/test',
+        url: '/stocks/info',
         method: 'get',
+        params,
+    })
+}
+export function operateStock(data) {
+    return request({
+        url: '/stocks/operate',
+        method: 'post',
+        data,
     })
 }

@@ -63,13 +63,16 @@ class StockService
         }
         $infoArr = explode(',', $info);
         $closePrice = round($infoArr[2], 2);
+        if ($closePrice == 0) {
+            return [];
+        }
         // 算出最大持仓数量
         $amount =  floor(StockHolding::MAX_BUY_MONEY / ($closePrice * 100)) * 100;
         if ($amount == 0) {
             $amount = 100;
         }
         return [
-            'code' => $infoArr[0],
+            'name' => $infoArr[0],
             'close_price' => (string)$closePrice,
             'amount' => $amount,
         ];
