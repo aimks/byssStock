@@ -89,15 +89,16 @@ class StockController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * 获取资产图表
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function getAssetsChart()
     {
-        //
+        $chart = $this->stockService->getAssetsChart();
+        return $this->ok([
+            'item' => $chart,
+        ]);
     }
 
     /**

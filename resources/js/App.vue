@@ -1,6 +1,6 @@
 <template>
     <div>
-        <router-view></router-view>
+        <router-view style="margin-bottom: 50px;"></router-view>
         <van-tabbar route>
             <van-tabbar-item replace to="/" icon="home-o">首页</van-tabbar-item>
             <van-tabbar-item replace to="/article" icon="label-o">早参</van-tabbar-item>

@@ -15,4 +15,5 @@ Route::group(['prefix' => 'stocks'], function () {
     Route::post('operate', 'StockController@operate');
     Route::get('info', 'StockController@getStockInfo');
     Route::get('holdings', 'StockController@getHoldings');
+    Route::get('assets/chart', 'StockController@getAssetsChart');
 });

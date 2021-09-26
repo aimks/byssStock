@@ -22,3 +22,10 @@ export function getHoldings() {
         method: 'get',
     })
 }
+
+export function getAssetsChart() {
+    return request({
+        url: '/stocks/assets/chart',
+        method: 'get',
+    })
+}

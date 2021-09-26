@@ -166,6 +166,15 @@ class StockService
     {
         return StockAsset::whereRaw("DATE_FORMAT(sync_at, '%Y-%m-%d') = ?", [$syncAt])->first();
     }
+
+    /**
+     * 获取所有资产
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAssets()
+    {
+        return StockAsset::orderBy('sync_at')->get();
+    }
     /**
      * 同步股票明细
      * @param StockHolding $holding
@@ -218,5 +227,52 @@ class StockService
         $asset->save();
         // 更新最后同步时间
         ConfigService::setLastSyncAt($date);
+    }
+    public function getAssetsChart()
+    {
+        $assets = $this->getAssets();
+        $xData = [];
+        $sData = [];
+        foreach ($assets as $asset) {
+            $xData[] = date('Y-m-d', strtotime($asset->sync_at));
+            $sData[] = $asset->balance + $asset->market_value;
+        }
+        return [
+            'tooltip' => [
+                'trigger' => 'axis',
+            ],
+            'dataZoom' => [
+                [
+                    'type' => 'inside',
+                    'start' => 80,
+                    'end' => 100,
+                ],
+                [
+                    'type' => 'slider',
+                    'start' => 80,
+                    'end' => 100,
+                ],
+            ],
+            'xAxis' => [
+                'type' => 'category',
+                'data' => $xData,
+            ],
+            'yAxis' => [
+                'type' => 'value',
+                'min' => '1000000',
+                'axisLabel' => [
+                    'inside' => true,
+                ],
+            ],
+            'series' => [
+                [
+                    'data' => $sData,
+                    'type' => 'line',
+                    'smooth' => true,
+                    'name' => '资产',
+                    'areaStyle' => [],
+                ],
+            ],
+        ];
     }
 }
