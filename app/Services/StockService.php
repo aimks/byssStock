@@ -11,10 +11,14 @@ use Illuminate\Support\Str;
 
 class StockService
 {
+    const API_TYPE_SINA = 'sina';
+    const API_TYPE_NET = 'net';
+    const API_TYPE_SOHO = 'soho';
     // 网易接口
-    const SINA_API_URL = 'https://hq.sinajs.cn/list={prefixCode}';
+    const API_URL_SINA = 'https://hq.sinajs.cn/list={prefixCode}';
     // 新浪接口
-    const NET_API_URL = 'http://quotes.money.163.com/service/chddata.html?code={prefixCode}&start={start}&end={end}&fields=TCLOSE';
+    const API_URL_NET = 'http://quotes.money.163.com/service/chddata.html?code={prefixCode}&start={start}&end={end}&fields=TCLOSE';
+    const API_URL_SOHO = 'https://q.stock.sohu.com/hisHq?code=cn_000001&start=20210201&end=20210201&stat=1&order=D&period=d&callback=historySearchHandler&rt=jsonp';
 
     /**
      * 获取股票信息
@@ -24,34 +28,45 @@ class StockService
      */
     public function getStockInfo(string $code)
     {
-        $prefixCode = $this->getPrefixCode($code);
-        return $this->getStockInfoBySina($prefixCode);
+        return $this->getStockInfoBySina($code);
     }
 
     /**
      * 获取股票前缀
      * @param string $code
-     * @param bool $isWy
+     * @param string $type
      * @return string
      */
-    private function getPrefixCode(string $code, bool $isNet = false)
+    private function getPrefixCode(string $code, string $type = self::API_TYPE_SINA)
     {
-        $prefix = $isNet ? '1' : 'sz';
-        if ($code[0] === '6') {
-            $prefix = $isNet ? '0' : 'sh';
+        $isShCode = $code[0] === '6';
+        switch ($type) {
+            case self::API_TYPE_SINA:
+                $prefix = $isShCode ? 'sh' : 'sz';
+                break;
+            case self::API_TYPE_NET:
+                $prefix = $isShCode ? '0' : '1';
+                break;
+            case self::API_TYPE_SOHO:
+                $prefix = 'cn_';
+                break;
+            default:
+                $prefix = '';
+                break;
         }
         return $prefix . $code;
     }
 
     /**
      * 新浪接口获取股票信息
-     * @param string $prefixCode
+     * @param string $code
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function getStockInfoBySina(string $prefixCode)
+    private function getStockInfoBySina(string $code)
     {
-        $url = Str::replaceFirst('{prefixCode}', $prefixCode, self::SINA_API_URL);
+        $prefixCode = $this->getPrefixCode($code, self::API_TYPE_SINA);
+        $url = Str::replaceFirst('{prefixCode}', $prefixCode, self::API_URL_SINA);
         $client = new Client();
         $response = $client->get($url);
         $result = $response->getBody()->getContents();
@@ -77,15 +92,16 @@ class StockService
 
     /**
      * 网易接口获取股票信息
-     * @param string $prefixCode
+     * @param string $code
      * @param $date
      * @return array|float[]
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function getStockInfoByNet(string $prefixCode, $date)
+    private function getStockInfoByNet(string $code, $date)
     {
+        $prefixCode = $this->getPrefixCode($code, self::API_TYPE_NET);
         $date = date("Ymd", strtotime($date));
-        $url = Str::replaceFirst('{prefixCode}', $prefixCode, self::NET_API_URL);
+        $url = Str::replaceFirst('{prefixCode}', $prefixCode, self::API_URL_NET);
         $url = Str::replaceFirst('{start}', $date, $url);
         $url = Str::replaceFirst('{end}', $date, $url);
         $client = new Client();
@@ -192,9 +208,7 @@ class StockService
      */
     public function syncStockDetail(StockHolding $holding, string $date)
     {
-
-        $code = $this->getPrefixCode($holding->code, true);
-        $info = $this->getStockInfoByNet($code, $date);
+        $info = $this->getStockInfoByNet($holding->code, $date);
         if (empty($info)) {
             return;
         }
@@ -225,16 +239,18 @@ class StockService
      */
     public function syncStockAsset(string $date)
     {
+        $balance = ConfigService::getBalance();
         $marketValueSum = StockDetail::where('sync_at', $date)->sum('market_value');
         // 当天没有市值，认为休市，同步资产为上一天
         if ($marketValueSum == 0) {
             $lastDate = date("Y-m-d", strtotime($date) - 86400);
             $lastAsset = $this->getAssetBySyncAt($lastDate);
+            $balance = $lastAsset->balance ?? 0;
             $marketValueSum = $lastAsset->market_value ?? 0;
         }
         // 新增资产
         $asset = new StockAsset();
-        $asset->balance = ConfigService::getBalance();
+        $asset->balance = $balance;
         $asset->market_value = $marketValueSum;
         $asset->sync_at = $date;
         $asset->save();

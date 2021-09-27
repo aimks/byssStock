@@ -33,6 +33,11 @@ class StockController extends Controller
         $closePrice = $request->input('close_price', '');
         $amount = $request->input('amount', 100);
         $operateAt = $request->input('operate_at', '');
+        $lastDate = date("Y-m-d", strtotime($operateAt) - 86400);
+        $lastAsset = $this->stockService->getAssetBySyncAt($lastDate);
+        if (!$lastAsset) {
+            return $this->error('当前日期上一天资产未同步，不能操作！');
+        }
         $holding = $this->stockService->getHoldingByCode($code);
         if ($type == StockRecord::TYPE_BUY) {
             $balance = ConfigService::getBalance();

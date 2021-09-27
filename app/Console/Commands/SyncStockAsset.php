@@ -41,6 +41,12 @@ class SyncStockAsset extends Command
         $stockService = new StockService();
         $date = $this->argument('date') ?? date('Y-m-d');
         $asset = $stockService->getAssetBySyncAt($date);
+        $lastDate = date("Y-m-d", strtotime($date) - 86400);
+        $lastAsset = $stockService->getAssetBySyncAt($lastDate);
+        if (!$lastAsset) {
+            $this->info('当前日期上一天未同步，不能同步当前日期');
+            return;
+        }
         if ($asset) {
             $this->info('当前日期已经同步');
             return;
@@ -58,6 +64,8 @@ class SyncStockAsset extends Command
         } catch (\Exception $e) {
             \DB::rollback();
             \Log::info('股票同步失败：' . $e->getMessage());
+            $this->info('股票持仓同步失败：' . $e->getMessage());
+            return ;
         }
         $this->info('股票持仓同步完成');
     }
