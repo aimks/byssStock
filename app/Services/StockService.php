@@ -136,6 +136,8 @@ class StockService
                 $profit->buy_price = $holding->buy_price;
                 $profit->sell_price = $holding->close_price;
                 $profit->profit = ($profit->sell_price - $profit->buy_price) * $profit->amount;
+                $profit->buy_at = $holding->buy_at;
+                $profit->sell_at = $operateAt;
                 $profit->save();
                 // 删除持仓表
                 $holding->delete();

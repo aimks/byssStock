@@ -47,6 +47,9 @@ class StockController extends Controller
             if (!$holding) {
                 return $this->error('该股票持仓不存在，不能卖出！');
             }
+            if (is_null($holding->buy_price)) {
+                return $this->error('股票买入价未同步，不能卖出！');
+            }
             // 卖出时为持仓数量
             $amount = $holding->amount;
         }

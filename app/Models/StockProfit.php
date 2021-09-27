@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $buy_price 股票买入价
  * @property string $sell_price 股票卖出价
  * @property string $profit 股票收益
- * @property string|null $sync_at 同步时间
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|StockProfit newModelQuery()
@@ -31,6 +30,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|StockProfit whereSyncAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StockProfit whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $buy_at 买入时间
+ * @property string|null $sell_at 卖出时间
+ * @method static \Illuminate\Database\Eloquent\Builder|StockProfit whereBuyAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|StockProfit whereSellAt($value)
  */
 class StockProfit extends Model
 {

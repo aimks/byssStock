@@ -21,7 +21,8 @@ class CreateStockProfitsTable extends Migration
             $table->decimal('buy_price', 10, 2)->comment('股票买入价');
             $table->decimal('sell_price', 10, 2)->comment('股票卖出价');
             $table->decimal('profit', 10, 2)->comment('股票收益');
-            $table->date('sync_at')->nullable()->comment('同步时间');
+            $table->date('buy_at')->nullable()->comment('买入时间');
+            $table->date('sell_at')->nullable()->comment('卖出时间');
             $table->timestamps();
         });
     }
