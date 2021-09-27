@@ -179,7 +179,7 @@ class StockService
                 $profit->name = $holding->name;
                 $profit->amount = $holding->amount;
                 $profit->buy_price = $holding->buy_price;
-                $profit->sell_price = $holding->close_price;
+                $profit->sell_price = $closePrice;
                 $profit->profit = ($profit->sell_price - $profit->buy_price) * $profit->amount;
                 $profit->buy_at = $holding->buy_at;
                 $profit->sell_at = $operateAt;
@@ -238,7 +238,7 @@ class StockService
     public function syncStockDetail(StockHolding $holding, string $date)
     {
         $info = $this->getStockInfo($holding->code, $date, true);
-        if (empty($info)) {
+        if (empty($info) || $info['amount'] == 0) {
             return;
         }
         $closePrice = $info['close_price'];
