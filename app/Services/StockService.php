@@ -23,12 +23,42 @@ class StockService
     /**
      * 获取股票信息
      * @param string $code
+     * @param string $date
+     * @param bool $isSync
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getStockInfo(string $code)
+    public function getStockInfo(string $code, string $date, bool $isSync = false)
     {
-        return $this->getStockInfoBySina($code);
+        $info = $this->getStockInfoBySina($code);
+        if (empty($info)) {
+            return [];
+        }
+        $isToday = date('Y-m-d') === date("Y-m-d", strtotime($date));
+        $closePrice = $info['close_price'];
+        // 时间不是今天，拿历史数据的股价
+        if (!$isToday) {
+            $historyInfo = $this->getStockInfoByNet($code, $date);
+            $closePrice = $historyInfo['close_price'] ?? 0;
+        }
+        if ($closePrice == 0) {
+            return [
+                'name' => $info['name'],
+                'close_price' => 0,
+                'amount' => 0,
+            ];
+        }
+        // 同步操作并且是今天，拿今天的最新价，即收盘价
+        if ($isSync && $isToday) {
+            $closePrice = $info['now_price'];
+        }
+        // 算出最大持仓数量
+        $amount =  floor(StockHolding::MAX_BUY_MONEY / ($closePrice * 100) + 1) * 100;
+        return [
+            'name' => $info['name'],
+            'close_price' => (string)$closePrice,
+            'amount' => $amount,
+        ];
     }
 
     /**
@@ -78,15 +108,14 @@ class StockService
         }
         $infoArr = explode(',', $info);
         $closePrice = round($infoArr[2], 2);
+        $nowPrice = round($infoArr[2], 2);
         if ($closePrice == 0) {
             return [];
         }
-        // 算出最大持仓数量
-        $amount =  floor(StockHolding::MAX_BUY_MONEY / ($closePrice * 100) + 1) * 100;
         return [
             'name' => $infoArr[0],
             'close_price' => (string)$closePrice,
-            'amount' => $amount,
+            'now_price' => $nowPrice,
         ];
     }
 
@@ -208,7 +237,7 @@ class StockService
      */
     public function syncStockDetail(StockHolding $holding, string $date)
     {
-        $info = $this->getStockInfoByNet($holding->code, $date);
+        $info = $this->getStockInfo($holding->code, $date, true);
         if (empty($info)) {
             return;
         }

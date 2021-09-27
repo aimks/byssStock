@@ -39,7 +39,7 @@
                     :rules="[{ required: true, message: '请输入股票代码' }]"
                 >
                     <template #button>
-                        <van-button size="small" type="primary" native-type="button" :disabled="stock.code == ''" @click="getStockInfo">获取股票信息</van-button>
+                        <van-button size="small" type="primary" native-type="button" :disabled="stock.code == '' || stock.operate_at == ''" @click="getStockInfo">获取股票信息</van-button>
                     </template>
                 </van-field>
                 <van-field
@@ -130,7 +130,7 @@ export default {
                 data: {
                     item
                 }
-            } = await getStockInfo({code: this.stock.code})
+            } = await getStockInfo({code: this.stock.code, operate_at: this.stock.operate_at})
             this.stock.name = item.name
             this.stock.close_price = item.close_price
             this.stock.amount = item.amount

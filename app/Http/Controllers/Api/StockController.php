@@ -71,12 +71,16 @@ class StockController extends Controller
     public function getStockInfo(Request $request)
     {
         $code = $request->input('code', '');
+        $operateAt = $request->input('operate_at', '');
         if (!$code) {
             return $this->error('没有股票代码！');
         }
-        $stockInfo = $this->stockService->getStockInfo($code);
+        $stockInfo = $this->stockService->getStockInfo($code, $operateAt);
         if (!$stockInfo) {
             return $this->error('没有找到股票信息！');
+        }
+        if ($stockInfo['amount'] == 0) {
+            return $this->error('当前日期不开市，请更换日期后操作！');
         }
         return $this->ok([
             'item' => $stockInfo,
