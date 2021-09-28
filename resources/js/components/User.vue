@@ -39,7 +39,16 @@
                     :rules="[{ required: true, message: '请输入股票代码' }]"
                 >
                     <template #button>
-                        <van-button size="small" type="primary" native-type="button" :disabled="stock.code == '' || stock.operate_at == ''" @click="getStockInfo">获取股票信息</van-button>
+                        <van-button
+                            :loading="loadingStock"
+                            loading-text="获取中..."
+                            style="width: 100px;"
+                            size="small"
+                            type="primary"
+                            native-type="button"
+                            :disabled="stock.code == '' || stock.operate_at == ''"
+                            @click="getStockInfo">获取股票信息
+                        </van-button>
                     </template>
                 </van-field>
                 <van-field
@@ -77,21 +86,27 @@ export default {
             password: '',
             hasPermission: false,
             showCalendar: false,
+            loadingStock: false,
             stock: {
                 type: 'buy',
                 operate_at: '',
                 code: '',
                 name: '',
-                close_price: 0,
-                amount: 0,
+                close_price: '',
+                amount: '',
             }
         };
     },
     watch: {
         'stock.code': function () {
             this.stock.name = '';
-            this.stock.close_price = 0;
-            this.stock.amount = 0;
+            this.stock.close_price = '';
+            this.stock.amount = '';
+        },
+        'stock.operate_at': function () {
+            this.stock.name = '';
+            this.stock.close_price = '';
+            this.stock.amount = '';
         },
     },
     mounted() {
@@ -126,6 +141,7 @@ export default {
         },
         async getStockInfo()
         {
+            this.loadingStock = true;
             const {
                 data: {
                     item
@@ -134,6 +150,7 @@ export default {
             this.stock.name = item.name
             this.stock.close_price = item.close_price
             this.stock.amount = item.amount
+            this.loadingStock = false;
         },
     },
 };

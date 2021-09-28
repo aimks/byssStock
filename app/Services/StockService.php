@@ -241,7 +241,7 @@ class StockService
         if (empty($info) || $info['amount'] == 0) {
             return;
         }
-        $closePrice = $info['close_price'];
+        $closePrice = (float)$info['close_price'];
         // 同步持仓信息
         $holding->close_price = $closePrice;
         $holding->market_value = $closePrice * $holding->amount;
@@ -302,12 +302,12 @@ class StockService
             'dataZoom' => [
                 [
                     'type' => 'inside',
-                    'start' => 80,
+                    'start' => 60,
                     'end' => 100,
                 ],
                 [
                     'type' => 'slider',
-                    'start' => 80,
+                    'start' => 60,
                     'end' => 100,
                 ],
             ],
@@ -317,7 +317,7 @@ class StockService
             ],
             'yAxis' => [
                 'type' => 'value',
-                'min' => '1000000',
+                'min' =>  500000,
                 'axisLabel' => [
                     'inside' => true,
                 ],

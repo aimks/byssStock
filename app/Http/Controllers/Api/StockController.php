@@ -33,6 +33,7 @@ class StockController extends Controller
         $closePrice = $request->input('close_price', '');
         $amount = $request->input('amount', 100);
         $operateAt = $request->input('operate_at', '');
+        $operateAt = date("Y-m-d", strtotime($operateAt));
         $lastDate = date("Y-m-d", strtotime($operateAt) - 86400);
         $lastAsset = $this->stockService->getAssetBySyncAt($lastDate);
         if (!$lastAsset) {
@@ -54,6 +55,9 @@ class StockController extends Controller
             }
             if (is_null($holding->buy_price)) {
                 return $this->error('股票买入价未同步，不能卖出！');
+            }
+            if ($holding->buy_at >= $operateAt) {
+                return $this->error('股票卖出时间小于买入时间，不能卖出！');
             }
             // 卖出时为持仓数量
             $amount = $holding->amount;
