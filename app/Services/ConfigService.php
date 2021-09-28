@@ -22,7 +22,7 @@ class ConfigService
     public static function setBalance(float $money)
     {
         $config = Config::where('key', Config::STOCK_BALANCE)->first();
-        $config->value += sprintf("%01.2f", $money);
+        $config->value = sprintf("%01.2f", $config->value + $money);
         $config->save();
     }
 

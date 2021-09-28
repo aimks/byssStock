@@ -142,14 +142,16 @@ export default {
         async getStockInfo()
         {
             this.loadingStock = true;
-            const {
-                data: {
-                    item
-                }
-            } = await getStockInfo({code: this.stock.code, operate_at: this.stock.operate_at})
-            this.stock.name = item.name
-            this.stock.close_price = item.close_price
-            this.stock.amount = item.amount
+            try {
+                const {
+                    data: {
+                        item
+                    }
+                } = await getStockInfo({code: this.stock.code, operate_at: this.stock.operate_at})
+                this.stock.name = item.name
+                this.stock.close_price = item.close_price
+                this.stock.amount = item.amount
+            } catch (e) {}
             this.loadingStock = false;
         },
     },
