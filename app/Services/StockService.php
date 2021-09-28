@@ -146,6 +146,51 @@ class StockService
             'close_price' => (float)$closePrice,
         ];
     }
+
+    /**
+     * 更新股票持仓和收益
+     * @param StockRecord $record
+     * @throws \Exception
+     */
+    public function updateStockHoldingsAndProfit(StockRecord $record)
+    {
+        switch ($record->type) {
+            case StockRecord::TYPE_BUY:
+                // 加入持仓表
+                $holding = new StockHolding();
+                $holding->code = $record->code;
+                $holding->name = $record->name;
+                $holding->amount = $record->amount;
+                $holding->buy_price = $record->close_price;
+                $holding->close_price = $record->close_price;
+                $holding->market_value = $record->amount * $record->close_price;
+                $holding->buy_at = $record->operate_at;
+                $holding->save();
+                // 更新资金余额
+                ConfigService::setBalance(-$holding->market_value);
+                break;
+            case StockRecord::TYPE_SELL:
+                $holding = $this->getHoldingByCode($record->code);
+                // 加入收益表
+                $profit = new StockProfit();
+                $profit->code = $holding->code;
+                $profit->name = $holding->name;
+                $profit->amount = $holding->amount;
+                $profit->buy_price = $holding->buy_price;
+                $profit->sell_price = $record->close_price;
+                $profit->profit = ($profit->sell_price - $profit->buy_price) * $profit->amount;
+                $profit->buy_at = $holding->buy_at;
+                $profit->sell_at = $record->operate_at;
+                $profit->save();
+                // 删除持仓表
+                $holding->delete();
+                // 更新资金余额
+                ConfigService::setBalance($record->amount * $record->close_price);
+                break;
+            default:
+                break;
+        }
+    }
     public function addRecord(string $code, string $name, string $type, string $closePrice, int $amount, string $operateAt)
     {
         // 加入记录
@@ -157,41 +202,7 @@ class StockService
         $record->close_price = $closePrice;
         $record->operate_at = $operateAt;
         $record->save();
-        switch ($type) {
-            case StockRecord::TYPE_BUY:
-                // 加入持仓表
-                $holding = new StockHolding();
-                $holding->code = $code;
-                $holding->name = $name;
-                $holding->amount = $amount;
-                $holding->close_price = $closePrice;
-                $holding->market_value = $amount * $closePrice;
-                $holding->buy_at = $operateAt;
-                $holding->save();
-                // 更新资金余额
-                ConfigService::setBalance(-$amount * $closePrice);
-                break;
-            case StockRecord::TYPE_SELL:
-                $holding = $this->getHoldingByCode($code);
-                // 加入收益表
-                $profit = new StockProfit();
-                $profit->code = $holding->code;
-                $profit->name = $holding->name;
-                $profit->amount = $holding->amount;
-                $profit->buy_price = $holding->buy_price;
-                $profit->sell_price = $closePrice;
-                $profit->profit = ($profit->sell_price - $profit->buy_price) * $profit->amount;
-                $profit->buy_at = $holding->buy_at;
-                $profit->sell_at = $operateAt;
-                $profit->save();
-                // 删除持仓表
-                $holding->delete();
-                // 更新资金余额
-                ConfigService::setBalance($amount * $closePrice);
-                break;
-            default:
-                break;
-        }
+        $this->updateStockHoldingsAndProfit($record);
     }
     /**
      * 根据代码获取持仓
@@ -246,10 +257,6 @@ class StockService
         $holding->close_price = $closePrice;
         $holding->market_value = $closePrice * $holding->amount;
         $holding->sync_at = $date;
-        // 买入价以第一次同步的收盘价为准
-        if (is_null($holding->buy_price)) {
-            $holding->buy_price = $closePrice;
-        }
         $holding->save();
         // 同步股票明细
         $detail = new StockDetail();

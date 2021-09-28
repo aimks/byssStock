@@ -36,6 +36,10 @@ class StockController extends Controller
         $operateAt = date("Y-m-d", strtotime($operateAt));
         $lastDate = date("Y-m-d", strtotime($operateAt) - 86400);
         $lastAsset = $this->stockService->getAssetBySyncAt($lastDate);
+        $asset = $this->stockService->getAssetBySyncAt($operateAt);
+        if ($asset) {
+            return $this->error('当前日期资产已经同步，不能操作！');
+        }
         if (!$lastAsset) {
             return $this->error('当前日期上一天资产未同步，不能操作！');
         }
