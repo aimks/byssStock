@@ -18,7 +18,7 @@ class StockService
     const API_URL_SINA = 'https://hq.sinajs.cn/list={prefixCode}';
     // 新浪接口
     const API_URL_NET = 'http://quotes.money.163.com/service/chddata.html?code={prefixCode}&start={start}&end={end}&fields=TCLOSE';
-    const API_URL_SOHO = 'https://q.stock.sohu.com/hisHq?code=cn_000001&start=20210201&end=20210201&stat=1&order=D&period=d&callback=historySearchHandler&rt=jsonp';
+    const API_URL_SOHO = 'https://q.stock.sohu.com/hisHq?code={prefixCode}&start={start}&end={end}&stat=1&order=D&period=d&callback=historySearchHandler&rt=jsonp';
 
     /**
      * 获取股票信息
@@ -142,6 +142,40 @@ class StockService
         }
         $infoArr = explode(',', $result);
         $closePrice = end($infoArr);
+        return [
+            'close_price' => (float)$closePrice,
+        ];
+    }
+
+    /**
+     * 搜狐股票接口获取股票信息
+     * @param string $code
+     * @param $date
+     * @return array|float[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function getStockInfoBySoho(string $code, $date)
+    {
+        $prefixCode = $this->getPrefixCode($code, self::API_TYPE_SOHO);
+        $date = date("Ymd", strtotime($date));
+        $url = Str::replaceFirst('{prefixCode}', $prefixCode, self::API_URL_SOHO);
+        $url = Str::replaceFirst('{start}', $date, $url);
+        $url = Str::replaceFirst('{end}', $date, $url);
+        $client = new Client();
+        $response = $client->get($url);
+        $result = $response->getBody()->getContents();
+        $result = iconv('GB2312', 'UTF-8', $result);
+        preg_match('/\((.*?)\)/', $result, $matches);
+        $info = $matches[1] ?? '{}';
+        $stockInfo = json_decode($info, true);
+        if (empty($stockInfo)) {
+            return [];
+        }
+        $stock = $stockInfo[0];
+        if (empty($stock['hq'][0])) {
+            return [];
+        }
+        $closePrice = $stock['hq'][0][2];
         return [
             'close_price' => (float)$closePrice,
         ];
