@@ -374,4 +374,34 @@ class StockService
             ],
         ];
     }
+
+    /**
+     * 根据搜索获取记录
+     * @param int $page
+     * @param int $pageSize
+     * @return array
+     */
+    public function getRecordsBySearch(int $page, int $pageSize)
+    {
+        $query = StockRecord::query();
+        $total = $query->count();
+        $query->orderByDesc('id');
+        $list = $query->offset(($page - 1) * $pageSize)->limit($pageSize)->get();
+        return [$total, $list];
+    }
+
+    /**
+     * 根据搜索获取收益
+     * @param int $page
+     * @param int $pageSize
+     * @return array
+     */
+    public function getProfitsBySearch(int $page, int $pageSize)
+    {
+        $query = StockProfit::query();
+        $total = $query->count();
+        $query->orderByDesc('profit');
+        $list = $query->offset(($page - 1) * $pageSize)->limit($pageSize)->get();
+        return [$total, $list];
+    }
 }

@@ -29,3 +29,19 @@ export function getAssetsChart() {
         method: 'get',
     })
 }
+
+export function getRecords(params) {
+    return request({
+        url: '/stocks/assets/records',
+        method: 'get',
+        params,
+    })
+}
+
+export function getProfits(params) {
+    return request({
+        url: '/stocks/assets/profits',
+        method: 'get',
+        params,
+    })
+}

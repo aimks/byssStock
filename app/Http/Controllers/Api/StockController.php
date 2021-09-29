@@ -122,13 +122,35 @@ class StockController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * 获取所有记录
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function getRecords(Request $request)
     {
-        //
+        $page = (int)$request->input('page', 1);
+        $pageSize = (int)$request->input('pageSize', 10);
+        list($total, $list) = $this->stockService->getRecordsBySearch($page, $pageSize);
+        return $this->ok([
+            'total' => $total,
+            'list' => $list,
+        ]);
+    }
+
+    /**
+     * 获取所有收益
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfits(Request $request)
+    {
+        $page = (int)$request->input('page', 1);
+        $pageSize = (int)$request->input('pageSize', 10);
+        list($total, $list) = $this->stockService->getProfitsBySearch($page, $pageSize);
+        return $this->ok([
+            'total' => $total,
+            'list' => $list,
+        ]);
     }
 }

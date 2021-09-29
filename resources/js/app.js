@@ -20,6 +20,9 @@ import {
     Tag,
     Col,
     Row,
+    Tab,
+    Tabs,
+    Pagination,
 } from 'vant';
 
 import {Notify} from 'vant';
@@ -39,6 +42,9 @@ Vue.use(List);
 Vue.use(Tag);
 Vue.use(Col);
 Vue.use(Row);
+Vue.use(Tab);
+Vue.use(Tabs);
+Vue.use(Pagination);
 
 Vue.use(Notify);
 
